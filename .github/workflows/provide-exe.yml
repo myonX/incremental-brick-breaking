@@ -1,0 +1,13 @@
+name: provide exe
+
+on:
+  push:
+    branches: ["master"]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    speps:
+    - name: install sbcl
+      run: echo "install sbcl"
