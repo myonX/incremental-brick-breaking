@@ -11,7 +11,7 @@ jobs:
     steps:
     - name: install sbcl
       run: |
-        winget install -e --id SBCL.SBCL
+        winget install -e --id SBCL.SBCL --accept-source-agreements --accept-package-agreements
         sbcl --version
     - name: install packages
       run: echo "install packages"
