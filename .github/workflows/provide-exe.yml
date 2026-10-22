@@ -13,6 +13,13 @@ jobs:
       run: |
         winget install -e --id SBCL.SBCL --accept-source-agreements --accept-package-agreements
         sbcl --version
+
+    - name: install quicklisp
+      run: |
+        curl.exe -O http://beta.quicklisp.org/quicklisp.lisp
+        sbcl --load quicklisp.lisp --eval "(progn (quicklisp-quickstart:install) \\
+                                           (ql:add-to-init-file))" \\
+                                   --quit
     - name: install packages
       run: echo "install packages"
     - name: make .exe
