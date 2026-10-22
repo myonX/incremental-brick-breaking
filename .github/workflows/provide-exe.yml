@@ -22,7 +22,7 @@ jobs:
         ros run -e '(ql-dist:install-dist "http://dist.shirakumo.org/shirakumo.txt" :prompt nil)'
         ros install glfw
         ros install pngload
-        ros install trial
+        ros dynamic-space-size=2gb install trial
     - name: install packages
       run: echo "install packages"
     - name: make .exe
