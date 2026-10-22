@@ -9,18 +9,12 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: install sbcl
+    - name: install roswell
       run: |
-        winget install -e --id SBCL.SBCL --accept-source-agreements --accept-package-agreements
-        $sbclPath = Split-Path (Get-Command sbcl.exe).Source
-        echo "$sbclPath" >> $env:GITHUB_PATH
-        sbcl --version
-
-    - name: install quicklisp
-      run: |
-        curl.exe -O http://beta.quicklisp.org/quicklisp.lisp
-        sbcl '--load' 'quicklisp.lisp' '--eval' "(quicklisp-quickstart:install)" '--quit'
-        sbcl '--eval' "(ql:add-to-init-file)" '--quit'
+        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+        Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+        scoop install roswell
+        ros setup
     - name: install packages
       run: echo "install packages"
     - name: make .exe
