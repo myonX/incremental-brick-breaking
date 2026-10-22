@@ -19,8 +19,8 @@ jobs:
     - name: install quicklisp
       run: |
         curl.exe -O http://beta.quicklisp.org/quicklisp.lisp
-        sbcl '--load' 'quicklisp.lisp' '--eval' "(progn (quicklisp-quickstart:install)
-                                                 (ql:add-to-init-file))"
+        sbcl '--load' 'quicklisp.lisp' '--eval' "(quicklisp-quickstart:install)"
+                                       '--eval' "(ql:add-to-init-file)"
                                        '--quit'
     - name: install packages
       run: echo "install packages"
