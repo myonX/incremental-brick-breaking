@@ -15,6 +15,13 @@ jobs:
         Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
         scoop install roswell
         ros setup
+    - name: downloads packages
+      run:|
+        ros run -e '(ql-dist:install-dist "http://dist.ultralisp.org/")'
+        ros run -e '(ql-dist:install-dist "http://dist.shirakumo.org/shirakumo.txt")'
+        rus install glfw
+        ros install pngload
+        ros install trial
     - name: install packages
       run: echo "install packages"
     - name: make .exe
