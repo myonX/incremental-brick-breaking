@@ -10,7 +10,9 @@ jobs:
 
     steps:
     - name: install sbcl
-      run: echo "install sbcl"
+      run: |
+        winget install -e --id SBCL.SBCL
+        sbcl --version
     - name: install packages
       run: echo "install packages"
     - name: make .exe
