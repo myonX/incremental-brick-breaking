@@ -16,7 +16,7 @@ jobs:
         scoop install roswell
         ros setup
     - name: downloads packages
-      run:|
+      run: |
         ros run -e '(ql-dist:install-dist "http://dist.ultralisp.org/")'
         ros run -e '(ql-dist:install-dist "http://dist.shirakumo.org/shirakumo.txt")'
         rus install glfw
