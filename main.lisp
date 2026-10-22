@@ -46,6 +46,9 @@
   ((color :initform (vec4 0 1 0 1))
    (velocity :initform (vec 3 3 0) :accessor velocity)))
 
+(defun calc-own-machine-x-bsize (lv)
+  (* 125 (expt 1.25 lv)))
+
 (defun enter-game-object (scene)
   ;; ボール: 見た目(scaling)と物理サイズ(radius)を合わせる
   (load-keymap)
@@ -59,7 +62,7 @@
   (enter (make-instance 'own-machine
                         :location (vec 500 100 0)
                         :name :own-machine
-                        :primitive (make-box :bsize (vec (* 125 (expt 1.25 (own-machine-lv scene))) 20 50)))
+                        :primitive (make-box :bsize (vec (calc-own-machine-x-bsize (own-machine-lv scene)) 20 50)))
          scene)
   
   ;; ブロック
@@ -168,7 +171,9 @@
                        (container own-machine))
   (let ((movement (directional 'move))
         (speed 650))
-    (incf (vx (location own-machine)) (* dt speed (vx movement))))
+    ;; (if (and (< () (location own-machine)) (<))
+    ;;     )
+    (incf (vx (location own-machine)) (* dt speed (vx movement))));ここの処理を書き換える
   (setf (vz (location own-machine)) 0))
 
 (define-handler (pipelined-scene quit) ()
