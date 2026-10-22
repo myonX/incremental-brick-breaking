@@ -18,8 +18,8 @@ jobs:
         ros setup
     - name: downloads packages
       run: |
-        ros run -e '(ql-dist:install-dist "http://dist.ultralisp.org/")'
-        ros run -e '(ql-dist:install-dist "http://dist.shirakumo.org/shirakumo.txt")'
+        ros run -e '(ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)'
+        ros run -e '(ql-dist:install-dist "http://dist.shirakumo.org/shirakumo.txt" :prompt nil)'
         ros install glfw
         ros install pngload
         ros install trial
