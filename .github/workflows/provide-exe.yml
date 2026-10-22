@@ -14,12 +14,13 @@ jobs:
         Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
         Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
         scoop install roswell
+        Add-Content $env:GITHUB_PATH "$env:USERPROFILE\scoop\shims"
         ros setup
     - name: downloads packages
       run: |
         ros run -e '(ql-dist:install-dist "http://dist.ultralisp.org/")'
         ros run -e '(ql-dist:install-dist "http://dist.shirakumo.org/shirakumo.txt")'
-        rus install glfw
+        ros install glfw
         ros install pngload
         ros install trial
     - name: install packages
