@@ -11,3 +11,9 @@ jobs:
     steps:
     - name: install sbcl
       run: echo "install sbcl"
+    - name: install packages
+      run: echo "install packages"
+    - name: make .exe
+      run echo "make .exe"
+    - name: release
+      run: echo "make release"
