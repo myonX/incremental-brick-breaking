@@ -170,10 +170,14 @@
                                    :scale 50)
                        (container own-machine))
   (let ((movement (directional 'move))
-        (speed 650))
-    ;; (if (and (< () (location own-machine)) (<))
-    ;;     )
-    (incf (vx (location own-machine)) (* dt speed (vx movement))));ここの処理を書き換える
+        (speed 650)
+        (b-size (calc-own-machine-x-bsize (own-machine-lv (container own-machine))))
+        (width (width *context*))
+        (x-location (vx (location own-machine))))
+    (cond ((and (< b-size x-location) (< (vx movement) 0))
+           (incf (vx (location own-machine)) (* dt speed (vx movement))))
+          ((and (< x-location (- width b-size)) (< 0 (vx movement)))
+           (incf (vx (location own-machine)) (* dt speed (vx movement))))))
   (setf (vz (location own-machine)) 0))
 
 (define-handler (pipelined-scene quit) ()
