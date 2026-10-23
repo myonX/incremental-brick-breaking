@@ -12,12 +12,17 @@
 (when (find-package :verbose)
   (funcall (find-symbol #:remove-global-controller :verbose)))
 
-;; もし他のスレッドも残っている場合に備えて強制終了させる場合（必要に応じて）
-#+sb-thread
-(dolist (thread (sb-thread:list-all-threads))
-  (unless (eq thread sb-thread:*current-thread*)
-    (ignore-errors (sb-thread:destroy-thread thread))))
+;; ;; もし他のスレッドも残っている場合に備えて強制終了させる場合（必要に応じて）
+;; #+sb-thread
+;; (dolist (thread (sb-thread:list-all-threads))
+;;   (unless (eq thread sb-thread:*current-thread*)
+;;     (ignore-errors (sb-thread:destroy-thread thread))))
 
-(sb-ext:save-lisp-and-die "hello"
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (sb-ext:save-lisp-and-die "hello"
                           :toplevel #'org.my.project:main
-                          :executable t)
+                          :executable t))
+
+(unless (find-packages :roswell)
+  (main))
