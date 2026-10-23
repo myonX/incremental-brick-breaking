@@ -57,6 +57,7 @@ jobs:
         run: |
           $localProjects = "$env:USERPROFILE\.roswell\local-projects"
           New-Item -ItemType Directory -Force -Path $localProjects | Out-Null
+          Copy-Item -path "incremental-brick-breaking" -Destination  "$localProjects\incremental-brick-breaking"-Recurse
           Move-Item -Path "alloy" -Destination "$localProjects\alloy" -Force
           Move-Item -Path "3b-bmfont" -Destination "$localProjects\3b-bmfont" -Force
           Move-Item -Path "sdf" -Destination "$localProjects\sdf" -Force
