@@ -64,7 +64,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path $cacheDir | Out-Null
           
           # リポジトリ内の cache/msdf/ の中身を Roswell のキャッシュディレクトリにコピー
-          Copy-Item -Path "cache\msdf-cashe" -Destination $cacheDir -Recurse -Force
+          Copy-Item -Path "cache\msdf-cashe\*" -Destination $cacheDir -Recurse -Force
 
       - name: Test
         shell: pwsh
