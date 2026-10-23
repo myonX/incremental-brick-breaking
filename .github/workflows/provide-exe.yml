@@ -28,8 +28,19 @@ jobs:
       with:
         repository: 'Shirakumo/alloy'
         path: '~/.roswell/local-projects/'
-    - name: install alloy
-      run: echo "install packages"
+
+    - name: Checkout 3b-bmfont
+      with:
+        repository: '3b/3b-bmfont'
+        path: '~/.roswell/local-projects/'
+
+    - name: Checkout sdf
+      uses: actions/checkout@v4
+      with:
+        repository: '3b/sdf'
+        path: '~/.roswell/local-projects/'
+        ref: msdf
+
     - name: make .exe
       run: echo "make .exe"
     - name: release
