@@ -14,6 +14,10 @@ jobs:
           git config --global core.eol lf
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Checkout repository2
+        uses: actions/checkout@v4
+        with:
+          path: 'i-b-b'
 
       - name: Install Roswell
         shell: pwsh
@@ -58,7 +62,7 @@ jobs:
           $localProjects = "$env:USERPROFILE\.roswell\local-projects"
           New-Item -ItemType Directory -Force -Path $localProjects | Out-Null
           ls
-          Copy-Item -path "incremental-brick-breaking" -Destination  "$localProjects\incremental-brick-breaking"-Recurse
+          Copy-Item -path "i-b-b" -Destination  "$localProjects\incremental-brick-breaking"-Recurse
           Move-Item -Path "alloy" -Destination "$localProjects\alloy" -Force
           Move-Item -Path "3b-bmfont" -Destination "$localProjects\3b-bmfont" -Force
           Move-Item -Path "sdf" -Destination "$localProjects\sdf" -Force
