@@ -3,7 +3,12 @@
                (:file "main")
                (:file "skill-tree-scene")
                (:file "title"))
-  :depends-on (:trial
+  :depends-on (;:deploy
+               :trial
                :trial-glfw
                :trial-png
-               :trial-alloy))
+               :trial-alloy)
+  ;; :build-operation "deploy-op"
+  ;; :build-pathname "my-project"
+  ;; :entry-point "org.my.project:main"
+  )

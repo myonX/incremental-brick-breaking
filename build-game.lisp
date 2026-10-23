@@ -1,17 +1,11 @@
-(ql:quickload :glfw)
-(ql:quickload :pngload)
+#+win32
+(load "Z:/home/myo/quicklisp/setup.lisp")
+
+
 (ql:quickload :trial)
-(ql:quickload :chroma)
 (ql:quickload :trial-alloy)
-(ql:quickload :alloy)
 
 (asdf:load-systems :my-project)
-;; (load "main.lisp")
-;; (load "keymap.lisp")
-;; (load "main.lisp")
-;; (load "package.lisp")
-;; (load "skill-tree-scene.lisp")
-;; (load "title.lisp")
 ;; 2. 【重要】保存する前に verbose のバックグラウンドスレッドを停止させる
 (when (find-package :verbose)
   (funcall (find-symbol #:remove-global-controller :verbose)))
