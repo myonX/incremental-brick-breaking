@@ -37,7 +37,8 @@ jobs:
       - name: Checkout alloy
         uses: actions/checkout@v4
         with:
-          repository: 'https://codeberg.org/shirakumo/alloy'
+          github-server-url:  https://codeberg.org
+          repository: shirakumo/alloy
           path: 'alloy'
 
       - name: Checkout 3b-bmfont
