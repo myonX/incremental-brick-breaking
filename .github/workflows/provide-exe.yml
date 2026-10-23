@@ -66,14 +66,11 @@ jobs:
           # リポジトリ内の cache/msdf/ の中身を Roswell のキャッシュディレクトリにコピー
           Copy-Item -Path "cache\msdf-cache\*" -Destination $cacheDir -Recurse -Force
 
-      - name: Test
-        shell: pwsh
-        run: |
-          ros run -e '(ql:quickload "alloy-examples")' -q
-
       - name: Make .exe
         shell: pwsh
-        run: echo "make .exe"
+        run: |
+          ros dynamic-space-size=4gb build-game.lisp
+          ls
 
       - name: Release
         shell: pwsh
