@@ -1,4 +1,4 @@
-name: provide exe
+name: build and test
 
 on:
   push:
@@ -7,49 +7,74 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
-    - name: install roswell
-      run: |
-        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-        Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
-        scoop install roswell
-        Add-Content $env:GITHUB_PATH "$env:USERPROFILE\scoop\shims"
-        ros setup
-    - name: install trial
-      run: |
-        ros run -e '(ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)'
-        ros run -e '(ql-dist:install-dist "http://dist.shirakumo.org/shirakumo.txt" :prompt nil)'
-        ros install glfw
-        ros install pngload
-        ros dynamic-space-size=4gb install trial
-    - name: Checkout alloy
-      uses: actions/checkout@v4
-      with:
-        repository: 'Shirakumo/alloy'
-        path: '~/.roswell/local-projects/'
+      - name: Install Roswell
+        shell: pwsh
+        run: |
+          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+          Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+          scoop install roswell
+          Add-Content $env:GITHUB_PATH "$env:USERPROFILE\scoop\shims"
+          ros setup
 
-    - name: Checkout 3b-bmfont
-      uses: actions/Checkout@v4
-      with:
-        repository: '3b/3b-bmfont'
-        path: '~/.roswell/local-projects/'
+      - name: Install Trial and Dependencies
+        shell: pwsh
+        run: |
+          ros run -e '(ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)'
+          ros run -e '(ql-dist:install-dist "http://dist.shirakumo.org/shirakumo.txt" :prompt nil)'
+          ros install glfw
+          ros install pngload
+          ros dynamic-space-size=4gb install trial
 
-    - name: Checkout sdf
-      uses: actions/checkout@v4
-      with:
-        repository: '3b/sdf'
-        path: '~/.roswell/local-projects/'
-        ref: msdf
+      - name: Checkout alloy
+        uses: actions/checkout@v4
+        with:
+          repository: 'Shirakumo/alloy'
+          path: 'alloy'
 
-    - name: fix msdf
-      run: |
-        curl -O https://filebox.tymoon.eu//file/TWpRMU9RPT0=
-        Expand-Archive -Path "./msdf-cache.zip" -DestinationPath "~/.cache/alloy/msdf/"
-    - name: test
-      run: |
-        ros run -e '(ql:quickload "alloy-examples")' -q
-    - name: make .exe
-      run: echo "make .exe"
-    - name: release
-      run: echo "make release"
+      - name: Checkout 3b-bmfont
+        uses: actions/checkout@v4
+        with:
+          repository: '3b/3b-bmfont'
+          path: '3b-bmfont'
+
+      - name: Checkout sdf (msdf branch)
+        uses: actions/checkout@v4
+        with:
+          repository: '3b/sdf'
+          ref: 'msdf'
+          path: 'sdf'
+
+      - name: Move repos to Roswell local-projects
+        shell: pwsh
+        run: |
+          $localProjects = "$env:USERPROFILE\.roswell\local-projects"
+          New-Item -ItemType Directory -Force -Path $localProjects | Out-Null
+          Move-Item -Path "alloy" -Destination "$localProjects\alloy" -Force
+          Move-Item -Path "3b-bmfont" -Destination "$localProjects\3b-bmfont" -Force
+          Move-Item -Path "sdf" -Destination "$localProjects\sdf" -Force
+
+      - name: Fix msdf cache
+        shell: pwsh
+        run: |
+          $cacheDir = "$env:USERPROFILE\.cache\alloy\msdf"
+          New-Item -ItemType Directory -Force -Path $cacheDir | Out-Null
+          
+          # 正しいファイル名でダウンロード
+          Invoke-WebRequest -Uri "https://filebox.tymoon.eu//file/TWpRMU9RPT0=" -OutFile "msdf-cache.zip"
+          
+          # キャッシュディレクトリへ展開
+          Expand-Archive -Path "msdf-cache.zip" -DestinationPath $cacheDir -Force
+
+      - name: Test
+        shell: pwsh
+        run: |
+          ros run -e '(ql:quickload "alloy-examples")' -q
+
+      - name: Make .exe
+        shell: pwsh
+        run: echo "make .exe"
+
+      - name: Release
+        shell: pwsh
+        run: echo "make release"
