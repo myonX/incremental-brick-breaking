@@ -8,6 +8,9 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Install Roswell
         shell: pwsh
         run: |
@@ -54,18 +57,14 @@ jobs:
           Move-Item -Path "3b-bmfont" -Destination "$localProjects\3b-bmfont" -Force
           Move-Item -Path "sdf" -Destination "$localProjects\sdf" -Force
 
-      - name: Fix msdf cache
+      - name: Copy msdf cache from repository
         shell: pwsh
         run: |
           $cacheDir = "$env:USERPROFILE\.cache\alloy\msdf"
           New-Item -ItemType Directory -Force -Path $cacheDir | Out-Null
           
-          # 正しいファイル名でダウンロード
-          Invoke-WebRequest -Uri "https://filebox.tymoon.eu//file/TWpRMU9RPT0=" -OutFile "msdf-cache.zip"
-          
-          # キャッシュディレクトリへ展開
-          Add-Type -AssemblyName System.IO.Compression.FileSystem
-          [System.IO.Compression.ZipFile]::ExtractToDirectory("$PWD\msdf-cache.zip", $cacheDir, $true)
+          # リポジトリ内の cache/msdf/ の中身を Roswell のキャッシュディレクトリにコピー
+          Copy-Item -Path "cache\msdf-cashe" -Destination $cacheDir -Recurse -Force
 
       - name: Test
         shell: pwsh
