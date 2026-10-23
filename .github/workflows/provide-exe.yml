@@ -42,6 +42,13 @@ jobs:
         path: '~/.roswell/local-projects/'
         ref: msdf
 
+    - name: fix msdf
+      run: |
+        curl -O https://filebox.tymoon.eu//file/TWpRMU9RPT0=
+        Expand-Archive -Path "./msdf-cache.zip" -DestinationPath "~/.cache/alloy/msdf/"
+    - name: test
+      run: |
+        ros run -e '(ql:quickload "alloy-examples")' -q
     - name: make .exe
       run: echo "make .exe"
     - name: release
