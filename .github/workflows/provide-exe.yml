@@ -30,7 +30,7 @@ jobs:
         path: '~/.roswell/local-projects/'
 
     - name: Checkout 3b-bmfont
-      uses: Checkout/actions@v4
+      uses: actions/Checkout@v4
       with:
         repository: '3b/3b-bmfont'
         path: '~/.roswell/local-projects/'
