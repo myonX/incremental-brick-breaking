@@ -1,5 +1,5 @@
 (ql:quickload :trial)
-;(ql:quickload :trial-alloy)
+(ql:quickload :trial-alloy)
 (ql:quickload :alloy)
 (asdf:load-systems :my-project)
 ;; (load "main.lisp")
