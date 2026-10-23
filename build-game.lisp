@@ -13,10 +13,10 @@
   (funcall (find-symbol #:remove-global-controller :verbose)))
 
 ;; ;; もし他のスレッドも残っている場合に備えて強制終了させる場合（必要に応じて）
-;; #+sb-thread
-;; (dolist (thread (sb-thread:list-all-threads))
-;;   (unless (eq thread sb-thread:*current-thread*)
-;;     (ignore-errors (sb-thread:destroy-thread thread))))
+#+sb-thread
+(dolist (thread (sb-thread:list-all-threads))
+  (unless (eq thread sb-thread:*current-thread*)
+    (ignore-errors (sb-thread:destroy-thread thread))))
 
 (defun main (&rest argv)
   (declare (ignorable argv))
@@ -24,5 +24,5 @@
                           :toplevel #'org.my.project:main
                           :executable t))
 
-(unless (find-packages :roswell)
+(unless (find-package :roswell)
   (main))
