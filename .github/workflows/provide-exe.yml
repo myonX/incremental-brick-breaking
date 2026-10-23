@@ -33,9 +33,6 @@ jobs:
         run: |
           ros run -e '(ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)'
           ros run -e '(ql-dist:install-dist "http://dist.shirakumo.org/shirakumo.txt" :prompt nil)'
-          ros install glfw
-          ros install pngload
-          ros dynamic-space-size=4gb install trial
 
       - name: Checkout alloy
         uses: actions/checkout@v4

@@ -1,7 +1,10 @@
+(ql:quickload :glfw)
+(ql:quickload :pngload)
 (ql:quickload :trial)
+(ql:quickload :chroma)
 (ql:quickload :trial-alloy)
 (ql:quickload :alloy)
-(ql:quickload :chroma)
+
 (asdf:load-systems :my-project)
 ;; (load "main.lisp")
 ;; (load "keymap.lisp")
