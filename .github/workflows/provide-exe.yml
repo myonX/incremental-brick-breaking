@@ -64,7 +64,8 @@ jobs:
           Invoke-WebRequest -Uri "https://filebox.tymoon.eu//file/TWpRMU9RPT0=" -OutFile "msdf-cache.zip"
           
           # キャッシュディレクトリへ展開
-          Expand-Archive -Path "msdf-cache.zip" -DestinationPath $cacheDir -Force
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [System.IO.Compression.ZipFile]::ExtractToDirectory("$PWD\msdf-cache.zip", $cacheDir, $true)
 
       - name: Test
         shell: pwsh
