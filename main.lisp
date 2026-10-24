@@ -66,11 +66,11 @@
          scene)
   
   ;; ブロック
-  (dotimes (i 20)
+  (dotimes (i 23)
     (dotimes (j 10)
       (enter (make-instance 'break-block
                             :name :break-block
-                            :location (vec (* 80 (+ i 1)) (+ 600 (* 50 j)) 0)
+                            :location (vec (* 80 (+ i 1)) (+ 600 (* 60 j)) 0)
                             :primitive (make-box :bsize (vec 40 30 50)))
              scene)))
   
@@ -139,30 +139,34 @@
                  ;; 速度の反射
                  (let ((dot (v. ball-vel normal)))
                    (when (< dot 0)
-                     (nv- ball-vel (v* normal (* 2.0 dot)))))
-                 t)))) ; 衝突した場合は T を返す
+                     (v- ball-vel (v* normal (* 2.0 dot))))))))) ; 衝突した場合はボールの向きを返す
 
       ;; 3. 自機との衝突判定
       (when target-machine
-        (resolve-collision target-machine))
+        (let ((reflect-ball-vel (resolve-collision target-machine)))
+          (when reflect-ball-vel
+            (setf (velocity ball) reflect-ball-vel))))
 
       ;; 4. ブロックとの衝突判定および破壊処理及びボールの分裂
-      (when (for:for ((entity over scene))
-                     (when (typep entity 'break-block)
-                       (when (resolve-collision entity)
-                         ;; 衝突が検知されたらそのブロックをシーンから削除
-                         (leave entity scene)
-                         ;;スコアを加算
-                         (incf (score (container ball)) 1)
-                         ;; 1フレームに複数ブロックを同時に叩き割らないようルプを抜ける
-                         (return 't))))
-        (enter-and-load (make-instance 'ball
-                                       :location (location ball)
-                                       :velocity (v* (velocity ball) -1.0)
-                                       :name :ball
-                                       :primitive (make-sphere :radius 10.0))
-                        (container ball)
-                        +main+))
+      (for:for ((entity over scene))
+               (when (typep entity 'break-block)
+                 (let ((reflect-ball-vel (resolve-collision entity)))
+                   (when reflect-ball-vel
+                     ;; 衝突が検知されたらそのブロックをシーンから削除
+                     (leave entity scene)
+                     ;;スコアを加算
+                     (incf (score (container ball)) 1)
+                     (enter-and-load (make-instance 'ball
+                                                    :location (location ball)
+                                                    :velocity (v* (velocity ball) -1.0)
+                                                    :name :ball
+                                                    :primitive (make-sphere :radius 10.0))
+                                     (container ball)
+                                     +main+)
+                     (setf (velocity ball) reflect-ball-vel)
+                     
+                     ;; 1フレームに複数ブロックを同時に叩き割らないようルプを抜ける
+                     (return 't)))))
 
     (setf (vz (location ball)) 0))))
     ;(v:info :trial "------------------------------------")))
