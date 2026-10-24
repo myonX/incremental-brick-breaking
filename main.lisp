@@ -44,7 +44,7 @@
 
 (define-shader-entity ball (listener collision-body)
   ((color :initform (vec4 0 1 0 1))
-   (velocity :initform (vec 3 3 0) :accessor velocity)))
+   (velocity :initarg :velocity :initform (vec 3 3 0) :accessor velocity)))
 
 (defun calc-own-machine-x-bsize (lv)
   (* 125 (expt 1.25 lv)))
@@ -66,11 +66,11 @@
          scene)
   
   ;; ブロック
-  (dotimes (i 26)
+  (dotimes (i 20)
     (dotimes (j 10)
       (enter (make-instance 'break-block
                             :name :break-block
-                            :location (vec (* 70 (+ i 1)) (+ 600 (* 50 j)) 0)
+                            :location (vec (* 80 (+ i 1)) (+ 600 (* 50 j)) 0)
                             :primitive (make-box :bsize (vec 40 30 50)))
              scene)))
   
@@ -146,29 +146,30 @@
       (when target-machine
         (resolve-collision target-machine))
 
-      ;; 4. ブロックとの衝突判定および破壊処理
-      (for:for ((entity over scene))
-        (when (typep entity 'break-block)
-          (when (resolve-collision entity)
-            ;; 衝突が検知されたらそのブロックをシーンから削除
-            (leave entity scene)
-            ;;スコアを加算
-            (incf (score (container ball)) 1)
-            
-            ;; 1フレームに複数ブロックを同時に叩き割らないようルプを抜ける
-            (return)))))
+      ;; 4. ブロックとの衝突判定および破壊処理及びボールの分裂
+      (when (for:for ((entity over scene))
+                     (when (typep entity 'break-block)
+                       (when (resolve-collision entity)
+                         ;; 衝突が検知されたらそのブロックをシーンから削除
+                         (leave entity scene)
+                         ;;スコアを加算
+                         (incf (score (container ball)) 1)
+                         ;; 1フレームに複数ブロックを同時に叩き割らないようルプを抜ける
+                         (return 't))))
+        (enter-and-load (make-instance 'ball
+                                       :location (location ball)
+                                       :velocity (v* (velocity ball) -1.0)
+                                       :name :ball
+                                       :primitive (make-sphere :radius 10.0))
+                        (container ball)
+                        +main+))
 
-    (setf (vz (location ball)) 0)))
+    (setf (vz (location ball)) 0))))
     ;(v:info :trial "------------------------------------")))
 
 (define-handler (own-machine key-press) (key)
   (case key
-    (:f (enter-and-load (make-instance 'ball
-                        :location (vec 100 100 0)
-                        :name :ball
-                        :primitive (make-sphere :radius 10.0))
-                        (container own-machine)
-                        +main+))))
+    (:f ())))
 
 ;; --- 自機の更新ハンドラ --- 自機が画面外に出ないようにする
 (define-handler (own-machine tick) (dt)
