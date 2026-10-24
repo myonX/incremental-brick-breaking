@@ -161,7 +161,14 @@
     (setf (vz (location ball)) 0)))
     ;(v:info :trial "------------------------------------")))
 
-
+(define-handler (own-machine key-press) (key)
+  (case key
+    (:f (enter-and-load (make-instance 'ball
+                        :location (vec 100 100 0)
+                        :name :ball
+                        :primitive (make-sphere :radius 10.0))
+                        (container own-machine)
+                        +main+))))
 
 ;; --- 自機の更新ハンドラ --- 自機が画面外に出ないようにする
 (define-handler (own-machine tick) (dt)
