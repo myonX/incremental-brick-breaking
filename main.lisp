@@ -1,5 +1,5 @@
 ;ros dynamic-space-size=4096 --eval '(progn (asdf:load-system :my-project))' main.lisp
-;; (progn (ql:quickload :trial) (ql:quickload :trial-alloy) (ql:quickload :alloy)(asdf:load-systems :my-project)(in-package #:org.my.project))
+;;(progn (ql:quickload :trial) (ql:quickload :trial-alloy) (ql:quickload :alloy)(asdf:load-systems :my-project)(in-package #:org.my.project))
 
 (in-package #:org.my.project)
 
@@ -9,7 +9,7 @@
 (defclass game (pipelined-scene)
   ((score :initarg :score :initform 0 :accessor score)
    (own-machine-lv :initarg :own-machine-lv :initform 0 :accessor own-machine-lv)
-   )
+   (duplicate-percentage :initarg :duplicate-percentage :initform 0 :accessor duplicate-percentage))
   )
 
 
@@ -95,6 +95,9 @@
 (define-handler (collision-body pre-tick) ()
                 (start-frame collision-body))
 
+(defun duplicatep (percentage)
+  (<= (random 100.0) percentage))
+
 ;; --- ボールの更新ハンドラ ---
 (define-handler (ball tick) (dt)
   (let ((ball-loc (location ball))
@@ -122,7 +125,8 @@
     (when (< (vy ball-loc) 0)
       (change-scene +main+ (make-instance 'skill-tree
                                           :own-machine-lv (own-machine-lv scene)
-                                          :score (score scene))))
+                                          :score (score scene)
+                                          :duplicate-percentage (duplicate-percentage scene))))
 
     ;; 衝突計算および応答用のローカル関数
     (flet ((resolve-collision (target)
@@ -156,13 +160,14 @@
                      (leave entity scene)
                      ;;スコアを加算
                      (incf (score (container ball)) 1)
-                     (enter-and-load (make-instance 'ball
+                     (when (duplicatep (duplicate-percentage scene))
+                       (enter-and-load (make-instance 'ball
                                                     :location (location ball)
                                                     :velocity (v* (velocity ball) -1.0)
                                                     :name :ball
                                                     :primitive (make-sphere :radius 10.0))
                                      (container ball)
-                                     +main+)
+                                     +main+))
                      (setf (velocity ball) reflect-ball-vel)
                      
                      ;; 1フレームに複数ブロックを同時に叩き割らないようルプを抜ける
