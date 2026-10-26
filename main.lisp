@@ -1,5 +1,5 @@
 ;ros dynamic-space-size=4096 --eval '(progn (asdf:load-system :my-project))' main.lisp
-;;(progn (ql:quickload :trial) (ql:quickload :trial-alloy) (ql:quickload :alloy)(asdf:load-systems :my-project)(in-package #:org.my.project))
+;;(progn (ql:quickload :trial) (ql:quickload :trial-alloy) (asdf:load-systems :my-project)(in-package #:org.my.project))
 
 (in-package #:org.my.project)
 
@@ -9,7 +9,8 @@
 (defclass game (pipelined-scene)
   ((score :initarg :score :initform 0 :accessor score)
    (own-machine-lv :initarg :own-machine-lv :initform 0 :accessor own-machine-lv)
-   (duplicate-percentage :initarg :duplicate-percentage :initform 0 :accessor duplicate-percentage))
+   (duplicate-percentage :initarg :duplicate-percentage :initform 0 :accessor duplicate-percentage)
+   (ball-speed :initarg :ball-speed :initform 50 :accessor ball-speed))
   )
 
 
@@ -60,7 +61,7 @@
   
   ;; 自機: 見た目(250x30)と物理サイズ(bsize = 幅高の半分: 125x15)を合わせる
   (enter (make-instance 'own-machine
-                        :location (vec 500 100 0)
+                        :location (vec (/ (width *context*) 2) 100 0)
                         :name :own-machine
                         :primitive (make-box :bsize (vec (calc-own-machine-x-bsize (own-machine-lv scene)) 20 50)))
          scene)
@@ -81,6 +82,11 @@
 
 
 (defmethod setup-scene ((main main) (scene game))
+           (enter (make-instance 'display-controller :font-size 50) scene)
+           (observe! (score scene) :title "score")
+           (observe! (duplicate-percentage scene) :title "duplicate probably:")
+           (observe! (own-machine-lv scene) :title "own machine lv")
+           (observe! (ball-speed scene) :title "ball-spped")
            (enter-game-object scene))
 
 (setf +app-system+ "my-project")
@@ -95,6 +101,13 @@
 (define-handler (collision-body pre-tick) ()
                 (start-frame collision-body))
 
+(defun go-to-skill-tree (scene)
+  (change-scene +main+ (make-instance 'skill-tree
+                                      :own-machine-lv (own-machine-lv scene)
+                                      :score (score scene)
+                                      :duplicate-percentage (duplicate-percentage scene)
+                                      :ball-speed (ball-speed scene))))
+
 (defun duplicatep (percentage)
   (<= (random 100.0) percentage))
 
@@ -107,7 +120,7 @@
         (hit-array (make-array 1 :initial-element (make-hit))))
     
     ;; 1. 移動計算
-    (nv+* ball-loc ball-vel (* 50 dt))
+    (nv+* ball-loc ball-vel (* (ball-speed scene) dt))
     
     ;; 移動後のボールのトランスフォーム（行列）を物理判定用に更新
     (start-frame ball)
@@ -123,10 +136,7 @@
       (setf (vx ball-loc) (width *context*))
       (setf (vx ball-vel) (- (vx ball-vel))))
     (when (< (vy ball-loc) 0)
-      (change-scene +main+ (make-instance 'skill-tree
-                                          :own-machine-lv (own-machine-lv scene)
-                                          :score (score scene)
-                                          :duplicate-percentage (duplicate-percentage scene))))
+      (go-to-skill-tree scene))
 
     ;; 衝突計算および応答用のローカル関数
     (flet ((resolve-collision (target)
@@ -147,9 +157,16 @@
 
       ;; 3. 自機との衝突判定
       (when target-machine
-        (let ((reflect-ball-vel (resolve-collision target-machine)))
+        (let ((reflect-ball-vel (resolve-collision target-machine)));(vabs)
           (when reflect-ball-vel
-            (setf (velocity ball) reflect-ball-vel))))
+            (let* ((paddle-loc (location target-machine))
+                   (paddle-width (* 2 (calc-own-machine-x-bsize (own-machine-lv scene))))
+                   (t-val (max -1.0 (min 1.0 (/ (- (vx ball-loc) (vx paddle-loc)) (* 0.5 paddle-width)))))
+                   (alpha-max (/ pi 3.0))
+                   (phi (- (/ pi 2.0) (* t-val alpha-max)))
+                   (speed (vlength ball-vel))
+                   (reflect (vec3 (* speed (cos phi)) (* speed (sin phi)) 0)))
+              (setf (velocity ball) reflect)))))
 
       ;; 4. ブロックとの衝突判定および破壊処理及びボールの分裂
       (for:for ((entity over scene))
@@ -178,14 +195,20 @@
 
 (define-handler (own-machine key-press) (key)
   (case key
-    (:f ())))
+    (:f (go-to-skill-tree (container own-machine)))))
 
 ;; --- 自機の更新ハンドラ --- 自機が画面外に出ないようにする
 (define-handler (own-machine tick) (dt)
-                (enter (debug-text (vec 0 1100 1)
-                                   (format nil "~A" (score (container own-machine)))
-                                   :scale 50)
-                       (container own-machine))
+
+                ;;ブロックがなくなったら脱出
+                (let ((scene (container own-machine)))
+                  (when (= 0 (count-if (lambda (e) (typep e 'break-block)) scene))
+                    (go-to-skill-tree (container own-machine))))
+    
+                ;; (enter (debug-text (vec 0 1100 1)
+                ;;                    (format nil "~A" (score (container own-machine)))
+                ;;                    :scale 50)
+                ;;        (container own-machine))
   (let ((movement (directional 'move))
         (speed 650)
         (b-size (calc-own-machine-x-bsize (own-machine-lv (container own-machine))))
