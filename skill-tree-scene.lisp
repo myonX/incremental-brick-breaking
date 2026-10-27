@@ -81,7 +81,7 @@
                              (format nil "Require ~A points" (d-and-s->upgrade-cost (/ (- (ball-speed menu) 50) 10)))))
                      (setf (alloy:value double-income)
                            (if (<= (mul-income->upgrade-cost (income-multiple menu))  (score menu))
-                               "Double the income"
+                               "Multiply the income"
                              (format nil "Require ~A points" (mul-income->upgrade-cost (income-multiple menu)))))))
             (update)
             (alloy:on (alloy:activate quit) ()
