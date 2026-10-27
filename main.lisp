@@ -10,7 +10,8 @@
   ((score :initarg :score :initform 0 :accessor score)
    (own-machine-lv :initarg :own-machine-lv :initform 0 :accessor own-machine-lv)
    (duplicate-percentage :initarg :duplicate-percentage :initform 0 :accessor duplicate-percentage)
-   (ball-speed :initarg :ball-speed :initform 50 :accessor ball-speed))
+   (ball-speed :initarg :ball-speed :initform 50 :accessor ball-speed)
+   (income-multiple :initarg :income-multiple :initform 1 :accessor income-multiple))
   )
 
 
@@ -48,7 +49,7 @@
    (velocity :initarg :velocity :initform (vec 3 3 0) :accessor velocity)))
 
 (defun calc-own-machine-x-bsize (lv)
-  (* 125 (expt 1.25 lv)))
+  (* 125 (+ 1 (* 0.2 lv))))
 
 (defun enter-game-object (scene)
   ;; ボール: 見た目(scaling)と物理サイズ(radius)を合わせる
@@ -78,15 +79,12 @@
   
   (enter (make-instance '2d-camera) scene)
   (enter (make-instance 'render-pass) scene))
-
-
-
 (defmethod setup-scene ((main main) (scene game))
-           (enter (make-instance 'display-controller :font-size 50) scene)
-           (observe! (score scene) :title "score")
-           (observe! (duplicate-percentage scene) :title "duplicate probably:")
-           (observe! (own-machine-lv scene) :title "own machine lv")
-           (observe! (ball-speed scene) :title "ball-spped")
+           ;; (enter (make-instance 'display-controller :font-size 50) scene)
+           ;; (observe! (score scene) :title "score")
+           ;; (observe! (duplicate-percentage scene) :title "duplicate probably:")
+           ;; (observe! (own-machine-lv scene) :title "own machine lv")
+           ;; (observe! (ball-speed scene) :title "ball-spped")
            (enter-game-object scene))
 
 (setf +app-system+ "my-project")
@@ -106,7 +104,8 @@
                                       :own-machine-lv (own-machine-lv scene)
                                       :score (score scene)
                                       :duplicate-percentage (duplicate-percentage scene)
-                                      :ball-speed (ball-speed scene))))
+                                      :ball-speed (ball-speed scene)
+                                      :income-multiple (income-multiple scene))))
 
 (defun duplicatep (percentage)
   (<= (random 100.0) percentage))
@@ -136,7 +135,7 @@
       (setf (vx ball-loc) (width *context*))
       (setf (vx ball-vel) (- (vx ball-vel))))
     (when (< (vy ball-loc) 0)
-      (go-to-skill-tree scene))
+      (leave ball scene))
 
     ;; 衝突計算および応答用のローカル関数
     (flet ((resolve-collision (target)
@@ -176,7 +175,7 @@
                      ;; 衝突が検知されたらそのブロックをシーンから削除
                      (leave entity scene)
                      ;;スコアを加算
-                     (incf (score (container ball)) 1)
+                     (incf (score (container ball)) (income-multiple scene))
                      (when (duplicatep (duplicate-percentage scene))
                        (enter-and-load (make-instance 'ball
                                                     :location (location ball)
@@ -204,11 +203,16 @@
                 (let ((scene (container own-machine)))
                   (when (= 0 (count-if (lambda (e) (typep e 'break-block)) scene))
                     (go-to-skill-tree (container own-machine))))
+
+                ;;ボールがなくなったら脱出
+                (let ((scene (container own-machine)))
+                  (when (= 0 (count-if (lambda (e) (typep e 'ball)) scene))
+                    (go-to-skill-tree (container own-machine))))
     
-                ;; (enter (debug-text (vec 0 1100 1)
-                ;;                    (format nil "~A" (score (container own-machine)))
-                ;;                    :scale 50)
-                ;;        (container own-machine))
+                (enter (debug-text (vec 0 1100 1)
+                                   (format nil "~A" (score (container own-machine)))
+                                   :scale 50)
+                       (container own-machine))
   (let ((movement (directional 'move))
         (speed 650)
         (b-size (calc-own-machine-x-bsize (own-machine-lv (container own-machine))))
